@@ -205,13 +205,21 @@ def analyze_exam_bank(
         passage = str(entry.get("passage", "")).strip()
         if not passage:
             continue
-        result = analyzer.analyze(
-            passage,
-            level=level or str(entry.get("level", "N3")),
-            focus=focus,
-            max_points=max_points_per_article,
-            include_context_vocabulary=False,
-        )
+        analyze_kwargs = {
+            "level": level or str(entry.get("level", "N3")),
+            "focus": focus,
+            "max_points": max_points_per_article,
+        }
+        try:
+            result = analyzer.analyze(
+                passage,
+                include_context_vocabulary=False,
+                **analyze_kwargs,
+            )
+        except TypeError as exc:
+            if "include_context_vocabulary" not in str(exc):
+                raise
+            result = analyzer.analyze(passage, **analyze_kwargs)
         article_results.append(ArticleBankAnalysis(entry=entry, analysis=result))
 
         for point in result.points:

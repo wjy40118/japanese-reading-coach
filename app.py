@@ -205,7 +205,6 @@ def ensure_minimum_points(
         level=level,
         focus=focus,
         max_points=minimum,
-        include_context_vocabulary=True,
     )
     existing = {(point.kind, point.term) for point in result.points}
     added = 0
