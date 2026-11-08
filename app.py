@@ -4,12 +4,6 @@ import json
 
 import streamlit as st
 
-from src.exam_bank import (
-    BankAnalysis,
-    analyze_exam_bank,
-    load_exam_bank,
-    search_exam_bank,
-)
 from src.furigana import (
     annotate_japanese,
     annotate_japanese_in_mixed_text,
@@ -18,6 +12,11 @@ from src.furigana import (
 from src.llm_analyzer import (
     LocalTransformersAnalyzer,
     local_model_dependencies_available,
+)
+from src.official_samples import (
+    OfficialSampleResource,
+    load_official_catalog,
+    search_official_samples,
 )
 from src.rule_analyzer import RuleBasedAnalyzer
 from src.samples import load_samples, sample_to_result
@@ -116,7 +115,7 @@ KIND_LABELS = {
     "cohesion": "篇章连接",
     "other": "其他",
 }
-DATA_VERSION = "2026-11-09-exact-exam-search-v5"
+DATA_VERSION = "2026-11-09-official-samples-v6"
 
 
 def frequency_stars(value: int) -> str:
@@ -137,9 +136,9 @@ def get_rule_analyzer(data_version: str) -> RuleBasedAnalyzer:
 
 
 @st.cache_data
-def get_exam_bank(data_version: str):
+def get_official_catalog(data_version: str):
     del data_version
-    return load_exam_bank()
+    return load_official_catalog()
 
 
 @st.cache_resource
@@ -149,11 +148,10 @@ def get_model_analyzer() -> LocalTransformersAnalyzer:
 
 def reset_analysis() -> None:
     st.session_state.pop("analysis", None)
-    st.session_state.pop("bank_analysis", None)
     st.session_state.pop("last_article", None)
     st.session_state.pop("last_analysis_level", None)
+    st.session_state.pop("official_sample_id", None)
     st.session_state["show_answers"] = False
-    st.session_state["bank_show_answers"] = False
 
 
 def migrate_result(result):
@@ -501,6 +499,74 @@ def render_bank_analysis(result: BankAnalysis) -> None:
         st.code(payload, language="json")
 
 
+def render_official_sample(resource: OfficialSampleResource) -> None:
+    st.divider()
+    st.subheader(f"{resource.level}｜{resource.collection_label}")
+    st.write(resource.description)
+    if resource.published_year:
+        st.caption(f"官方资料发布年份：{resource.published_year}")
+    else:
+        st.caption("官方互动样题，不按考试年份逐年发布。")
+    st.info(
+        "这里仅接入 JLPT 官方公开链接，不复制或重新托管题面。"
+        "官方样题不等同于完整历年真题。"
+    )
+
+    left, right = st.columns(2)
+    with left:
+        st.link_button(
+            "打开官方样题",
+            resource.question_url,
+            width="stretch",
+        )
+    with right:
+        if resource.answer_url:
+            st.link_button(
+                "打开官方答案",
+                resource.answer_url,
+                width="stretch",
+            )
+        else:
+            st.button(
+                "该样题无单独答案文件",
+                disabled=True,
+                width="stretch",
+            )
+
+    st.markdown("**使用方式**")
+    st.write(
+        "打开官方 PDF 或互动样题，复制其中允许用于学习的阅读正文，"
+        "再到“规则解析”中粘贴分析。应用不会自动抓取或保存官方题面。"
+    )
+    if st.button("转到单篇分析", type="secondary"):
+        st.session_state["analysis_mode"] = "规则解析"
+        st.session_state["article_input"] = ""
+        st.rerun()
+
+    with st.expander("来源与版权说明"):
+        st.markdown(f"[JLPT 官方样题页面]({resource.source_url})")
+        st.markdown(f"[官方版权与使用政策]({resource.policy_url})")
+
+    metadata = {
+        "id": resource.id,
+        "level": resource.level,
+        "collection": resource.collection_label,
+        "published_year": resource.published_year,
+        "description": resource.description,
+        "question_url": resource.question_url,
+        "answer_url": resource.answer_url,
+        "source_url": resource.source_url,
+        "policy_url": resource.policy_url,
+        "note": "仅保存官方资源元数据，不包含题面正文。",
+    }
+    st.download_button(
+        "导出官方资源信息",
+        data=json.dumps(metadata, ensure_ascii=False, indent=2),
+        file_name=f"{resource.id}-official-resource.json",
+        mime="application/json",
+    )
+
+
 def main() -> None:
     st.markdown('<div class="hero-kicker">READING COACH</div>', unsafe_allow_html=True)
     st.title("日文阅读拆解教练")
@@ -511,7 +577,7 @@ def main() -> None:
 
     samples = get_samples(DATA_VERSION)
     analyzer = get_rule_analyzer(DATA_VERSION)
-    exam_bank = get_exam_bank(DATA_VERSION)
+    official_catalog = get_official_catalog(DATA_VERSION)
     model_deps_ready = local_model_dependencies_available()
 
     with st.sidebar:
@@ -522,10 +588,11 @@ def main() -> None:
                 "演示案例",
                 "规则解析",
                 "本地模型（可选）",
-                "近10年阅读题库",
+                "官方公开样题",
             ],
             index=0,
             on_change=reset_analysis,
+            key="analysis_mode",
         )
         level = st.selectbox(
             "预估水平",
@@ -552,83 +619,58 @@ def main() -> None:
                 "请执行 pip install -r requirements.txt。"
             )
         st.caption("考频星级为基于常见考试与练习的估计值，不是官方统计数据。")
-        st.caption("通用分析只显示所选等级；题库模式以题库内的考试等级为准。")
+        st.caption("通用分析只显示所选等级；官方样题模式以模式内的考试等级为准。")
 
     article = ""
     analyze_clicked = False
-    bank_analyze_clicked = False
+    official_search_clicked = False
     pending_result = None
-    pending_bank_entries = []
     permission = False
     needs_refresh_notice = False
     active_level = level
+    matched_official_resource: OfficialSampleResource | None = None
 
-    if mode_label == "近10年阅读题库":
-        years = sorted(
-            {int(entry["year"]) for entry in exam_bank},
-            reverse=True,
-        )
-        selected_year = st.selectbox(
-            "选择年份",
-            years,
+    if mode_label == "官方公开样题":
+        official_levels = ["N1", "N2", "N3", "N4", "N5"]
+        official_level = st.selectbox(
+            "考试等级",
+            official_levels,
+            index=official_levels.index(level) if level in official_levels else 2,
             on_change=reset_analysis,
         )
-        exam_level_options = ["N4", "N3", "N2", "N1"]
-        bank_level = st.selectbox(
-            "考试等级",
-            exam_level_options,
-            index=exam_level_options.index(level) if level in exam_level_options else 1,
+        collections = official_catalog["collections"]
+        collection_labels = [str(item["label"]) for item in collections]
+        selected_collection_label = st.selectbox(
+            "资料来源",
+            collection_labels,
+            index=2 if len(collection_labels) > 2 else 0,
+            on_change=reset_analysis,
         )
-        active_level = bank_level
-        pending_bank_entries = search_exam_bank(
-            exam_bank,
-            selected_year,
-            active_level,
+        selected_collection = collections[
+            collection_labels.index(selected_collection_label)
+        ]
+        active_level = official_level
+        official_resource = search_official_samples(
+            official_catalog,
+            level=official_level,
+            collection_id=str(selected_collection["id"]),
         )
-        total_questions = sum(
-            len(entry.get("questions", []))
-            for entry in pending_bank_entries
+        matched_official_resource = official_resource
+        st.info(
+            "官方公开样题不按考试年份逐年发布，因此这里改为按等级和资料版本检索。"
         )
-        matched_official = bool(pending_bank_entries) and all(
-            entry.get("source_type") == "official"
-            for entry in pending_bank_entries
-        )
-        if matched_official:
-            st.success(
-                f"已匹配 {selected_year} 年 {active_level} 的授权真题。"
+        if official_resource:
+            st.caption(
+                f"已匹配：{official_level}｜{official_resource.collection_label}"
             )
         else:
-            st.info(
-                f"当前匹配的是 {selected_year} 年 {active_level} 的原创模拟题。"
-                "应用不会把模拟题标成真题；正式真题需导入有授权的数据。"
-            )
-        st.caption(
-            f"当前精确匹配 {len(pending_bank_entries)} 篇文章、"
-            f"{total_questions} 道阅读题。"
-        )
-        if not pending_bank_entries:
             st.warning(
-                f"题库中没有 {selected_year} 年 {active_level} 的可用题目。"
-                "请更换年份或考试等级。"
+                f"没有找到 {official_level}｜{selected_collection_label} 的官方资源。"
             )
-        if pending_bank_entries:
-            st.dataframe(
-                [
-                    {
-                        "年份": entry["year"],
-                        "文章": entry["title"],
-                        "水平": entry["level"],
-                        "主题": entry["topic"],
-                    }
-                    for entry in pending_bank_entries
-                ],
-                hide_index=True,
-                width="stretch",
-            )
-        bank_analyze_clicked = st.button(
-            "查找并分析题目",
+        official_search_clicked = st.button(
+            "查找官方样题",
             type="primary",
-            disabled=not pending_bank_entries,
+            disabled=official_resource is None,
         )
     elif mode_label == "演示案例":
         sample_titles = [f"{item['title']}｜{item['description']}" for item in samples]
@@ -691,24 +733,18 @@ def main() -> None:
 
     previous_level = st.session_state.get("last_analysis_level")
     if not previous_level:
-        previous_bank = st.session_state.get("bank_analysis")
         previous_result = st.session_state.get("analysis")
-        if previous_bank is not None:
-            previous_level = getattr(previous_bank, "level", "")
-        elif previous_result is not None:
+        if previous_result is not None:
             previous_level = getattr(previous_result, "estimated_level", "")
-    has_previous_result = (
-        st.session_state.get("analysis") is not None
-        or st.session_state.get("bank_analysis") is not None
-    )
+    has_previous_result = st.session_state.get("analysis") is not None
     if has_previous_result and previous_level and previous_level != active_level:
         reset_analysis()
         needs_refresh_notice = True
 
     if refresh_requested:
         reset_analysis()
-        if mode_label == "近10年阅读题库" and pending_bank_entries:
-            bank_analyze_clicked = True
+        if mode_label == "官方公开样题" and matched_official_resource:
+            official_search_clicked = True
         elif mode_label == "演示案例":
             analyze_clicked = True
         elif mode_label == "规则解析" and permission:
@@ -718,23 +754,8 @@ def main() -> None:
         else:
             needs_refresh_notice = True
 
-    if bank_analyze_clicked:
-        st.session_state["show_answers"] = False
-        st.session_state["bank_show_answers"] = False
-        try:
-            with st.spinner("正在批量分析文章并汇总知识点……"):
-                bank_result = analyze_exam_bank(
-                    pending_bank_entries,
-                    analyzer,
-                    level=active_level,
-                    focus=focus,
-                )
-            st.session_state["bank_analysis"] = bank_result
-            st.session_state["last_analysis_level"] = active_level
-            st.session_state.pop("analysis", None)
-            st.session_state.pop("last_article", None)
-        except Exception as exc:
-            st.error(str(exc))
+    if official_search_clicked and matched_official_resource:
+        st.session_state["official_sample_id"] = matched_official_resource.id
 
     if analyze_clicked:
         st.session_state["show_answers"] = False
@@ -771,7 +792,6 @@ def main() -> None:
             st.session_state["analysis"] = result
             st.session_state["last_analysis_level"] = level
             st.session_state["last_article"] = article
-            st.session_state.pop("bank_analysis", None)
         except Exception as exc:
             st.error(str(exc))
             st.info("可以切换到演示案例或规则解析继续体验。")
@@ -780,11 +800,21 @@ def main() -> None:
     if result is not None:
         st.session_state["analysis"] = result
     last_article = st.session_state.get("last_article", article)
-    bank_result = st.session_state.get("bank_analysis")
-    if needs_refresh_notice and not analyze_clicked and not bank_analyze_clicked:
+    official_result = None
+    if (
+        matched_official_resource
+        and st.session_state.get("official_sample_id")
+        == matched_official_resource.id
+    ):
+        official_result = matched_official_resource
+    if (
+        needs_refresh_notice
+        and not analyze_clicked
+        and not official_search_clicked
+    ):
         st.info("预估水平或刷新条件已变化，请点击左侧【刷新】重新分析。")
-    if bank_result:
-        render_bank_analysis(bank_result)
+    if official_result:
+        render_official_sample(official_result)
     elif result:
         render_analysis(result, last_article)
     else:

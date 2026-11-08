@@ -1,0 +1,120 @@
+{
+  "source_name": "JLPT Official Sample Questions",
+  "source_url": "https://www.jlpt.jp/e/samples/forlearners.html",
+  "policy_url": "https://www.jlpt.jp/e/policy.html#policy01",
+  "collections": [
+    {
+      "id": "sample2009",
+      "label": "2009 新日语能力考试公开样题",
+      "description": "官方公开样题合集，含阅读，题量不同于实际考试。",
+      "published_year": 2009,
+      "levels": {
+        "N1": {
+          "question_url": "https://www.jlpt.jp/e/samples/pdf/N1-mondai.pdf",
+          "answer_url": "https://www.jlpt.jp/e/samples/pdf/N1-seikai.pdf"
+        },
+        "N2": {
+          "question_url": "https://www.jlpt.jp/e/samples/pdf/N2-mondai.pdf",
+          "answer_url": "https://www.jlpt.jp/e/samples/pdf/N2-seikai.pdf"
+        },
+        "N3": {
+          "question_url": "https://www.jlpt.jp/e/samples/pdf/N3-mondai.pdf",
+          "answer_url": "https://www.jlpt.jp/e/samples/pdf/N3-seikai.pdf"
+        },
+        "N4": {
+          "question_url": "https://www.jlpt.jp/e/samples/pdf/N4-mondai.pdf",
+          "answer_url": "https://www.jlpt.jp/e/samples/pdf/N4-seikai.pdf"
+        },
+        "N5": {
+          "question_url": "https://www.jlpt.jp/e/samples/pdf/N5-mondai.pdf",
+          "answer_url": "https://www.jlpt.jp/e/samples/pdf/N5-seikai.pdf"
+        }
+      }
+    },
+    {
+      "id": "workbook2012",
+      "label": "2012 官方练习册",
+      "description": "官方练习册阅读部分，题目选自 2010 年改版后的试题。",
+      "published_year": 2012,
+      "levels": {
+        "N1": {
+          "question_url": "https://www.jlpt.jp/samples/sample2012/pdf/N1R.pdf",
+          "answer_url": "https://www.jlpt.jp/samples/sample2012/pdf/N1answer.pdf"
+        },
+        "N2": {
+          "question_url": "https://www.jlpt.jp/samples/sample2012/pdf/N2R.pdf",
+          "answer_url": "https://www.jlpt.jp/samples/sample2012/pdf/N2answer.pdf"
+        },
+        "N3": {
+          "question_url": "https://www.jlpt.jp/samples/sample2012/pdf/N3R.pdf",
+          "answer_url": "https://www.jlpt.jp/samples/sample2012/pdf/N3answer.pdf"
+        },
+        "N4": {
+          "question_url": "https://www.jlpt.jp/samples/sample2012/pdf/N4R.pdf",
+          "answer_url": "https://www.jlpt.jp/samples/sample2012/pdf/N4answer.pdf"
+        },
+        "N5": {
+          "question_url": "https://www.jlpt.jp/samples/sample2012/pdf/N5R.pdf",
+          "answer_url": "https://www.jlpt.jp/samples/sample2012/pdf/N5answer.pdf"
+        }
+      }
+    },
+    {
+      "id": "workbook2018",
+      "label": "2018 官方练习册 Vol.2",
+      "description": "官方练习册第二册阅读部分，题量接近实际考试。",
+      "published_year": 2018,
+      "levels": {
+        "N1": {
+          "question_url": "https://www.jlpt.jp/samples/sample2018/pdf/N1R.pdf",
+          "answer_url": "https://www.jlpt.jp/samples/sample2018/pdf/N1answer.pdf"
+        },
+        "N2": {
+          "question_url": "https://www.jlpt.jp/samples/sample2018/pdf/N2R.pdf",
+          "answer_url": "https://www.jlpt.jp/samples/sample2018/pdf/N2answer.pdf"
+        },
+        "N3": {
+          "question_url": "https://www.jlpt.jp/samples/sample2018/pdf/N3R.pdf",
+          "answer_url": "https://www.jlpt.jp/samples/sample2018/pdf/N3answer.pdf"
+        },
+        "N4": {
+          "question_url": "https://www.jlpt.jp/samples/sample2018/pdf/N4R.pdf",
+          "answer_url": "https://www.jlpt.jp/samples/sample2018/pdf/N4answer.pdf"
+        },
+        "N5": {
+          "question_url": "https://www.jlpt.jp/samples/sample2018/pdf/N5R.pdf",
+          "answer_url": "https://www.jlpt.jp/samples/sample2018/pdf/N5answer.pdf"
+        }
+      }
+    },
+    {
+      "id": "interactive",
+      "label": "官方互动样题",
+      "description": "JLPT 官网按题型提供的互动样题，每个题型一个样例。",
+      "published_year": null,
+      "levels": {
+        "N1": {
+          "question_url": "https://www.jlpt.jp/e/samples/n1/index.html",
+          "answer_url": null
+        },
+        "N2": {
+          "question_url": "https://www.jlpt.jp/e/samples/n2/index.html",
+          "answer_url": null
+        },
+        "N3": {
+          "question_url": "https://www.jlpt.jp/e/samples/n3/index.html",
+          "answer_url": null
+        },
+        "N4": {
+          "question_url": "https://www.jlpt.jp/e/samples/n4/index.html",
+          "answer_url": null
+        },
+        "N5": {
+          "question_url": "https://www.jlpt.jp/e/samples/n5/index.html",
+          "answer_url": null
+        }
+      }
+    }
+  ]
+}
+
