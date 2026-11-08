@@ -12,6 +12,7 @@ from src.exam_bank import (
     analyze_exam_bank,
     filter_exam_bank,
     load_exam_bank,
+    search_exam_bank,
 )
 from src.rule_analyzer import RuleBasedAnalyzer
 
@@ -30,6 +31,17 @@ class ExamBankTests(unittest.TestCase):
         selected = filter_exam_bank(self.entries, [2025, 2026])
         self.assertEqual(len(selected), 4)
         self.assertTrue(all(entry["year"] in {2025, 2026} for entry in selected))
+
+    def test_search_requires_exact_year_and_level(self) -> None:
+        selected = search_exam_bank(self.entries, 2025, "N1")
+        self.assertTrue(selected)
+        self.assertTrue(
+            all(
+                entry["year"] == 2025 and entry["level"] == "N1"
+                for entry in selected
+            )
+        )
+        self.assertEqual(search_exam_bank(self.entries, 2025, "N4"), [])
 
     def test_batch_analysis_aggregates_points(self) -> None:
         result = analyze_exam_bank(
@@ -58,6 +70,7 @@ class ExamBankTests(unittest.TestCase):
             )
         )
         self.assertIn("原创模拟题", result.disclaimer)
+        self.assertEqual(result.source_label, "原创模拟题")
 
     def test_every_selected_article_has_points(self) -> None:
         result = analyze_exam_bank(

@@ -7,8 +7,8 @@ import streamlit as st
 from src.exam_bank import (
     BankAnalysis,
     analyze_exam_bank,
-    filter_exam_bank,
     load_exam_bank,
+    search_exam_bank,
 )
 from src.furigana import (
     annotate_japanese,
@@ -116,7 +116,7 @@ KIND_LABELS = {
     "cohesion": "篇章连接",
     "other": "其他",
 }
-DATA_VERSION = "2026-11-09-ten-year-bank-v4"
+DATA_VERSION = "2026-11-09-exact-exam-search-v5"
 
 
 def frequency_stars(value: int) -> str:
@@ -361,7 +361,12 @@ def render_analysis(result: AnalysisResult, article: str) -> None:
 
 def render_bank_analysis(result: BankAnalysis) -> None:
     st.divider()
-    st.subheader("近10年模拟阅读题库分析")
+    year_label = (
+        str(result.selected_years[0])
+        if len(result.selected_years) == 1
+        else "、".join(str(year) for year in result.selected_years)
+    )
+    st.subheader(f"{year_label}年 {result.level} {result.source_label}分析")
 
     first, second, third, fourth = st.columns(4)
     first.metric("文章", len(result.articles))
@@ -563,10 +568,9 @@ def main() -> None:
             {int(entry["year"]) for entry in exam_bank},
             reverse=True,
         )
-        selected_years = st.multiselect(
+        selected_year = st.selectbox(
             "选择年份",
             years,
-            default=years,
             on_change=reset_analysis,
         )
         exam_level_options = ["N4", "N3", "N2", "N1"]
@@ -576,18 +580,37 @@ def main() -> None:
             index=exam_level_options.index(level) if level in exam_level_options else 1,
         )
         active_level = bank_level
-        pending_bank_entries = filter_exam_bank(exam_bank, selected_years)
+        pending_bank_entries = search_exam_bank(
+            exam_bank,
+            selected_year,
+            active_level,
+        )
         total_questions = sum(
             len(entry.get("questions", []))
             for entry in pending_bank_entries
         )
-        st.info(
-            "题库为按近10年题型和难度编写的原创模拟题，不包含或复刻受版权保护的历年真题。"
+        matched_official = bool(pending_bank_entries) and all(
+            entry.get("source_type") == "official"
+            for entry in pending_bank_entries
         )
+        if matched_official:
+            st.success(
+                f"已匹配 {selected_year} 年 {active_level} 的授权真题。"
+            )
+        else:
+            st.info(
+                f"当前匹配的是 {selected_year} 年 {active_level} 的原创模拟题。"
+                "应用不会把模拟题标成真题；正式真题需导入有授权的数据。"
+            )
         st.caption(
-            f"当前选择 {len(pending_bank_entries)} 篇文章、"
+            f"当前精确匹配 {len(pending_bank_entries)} 篇文章、"
             f"{total_questions} 道阅读题。"
         )
+        if not pending_bank_entries:
+            st.warning(
+                f"题库中没有 {selected_year} 年 {active_level} 的可用题目。"
+                "请更换年份或考试等级。"
+            )
         if pending_bank_entries:
             st.dataframe(
                 [
@@ -603,7 +626,7 @@ def main() -> None:
                 width="stretch",
             )
         bank_analyze_clicked = st.button(
-            "自动分析题库",
+            "查找并分析题目",
             type="primary",
             disabled=not pending_bank_entries,
         )

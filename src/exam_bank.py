@@ -30,6 +30,21 @@ def filter_exam_bank(
     return [entry for entry in entries if int(entry.get("year", 0)) in wanted]
 
 
+def search_exam_bank(
+    entries: list[dict[str, Any]],
+    year: int,
+    level: str,
+) -> list[dict[str, Any]]:
+    selected_year = int(year)
+    selected_level = str(level).upper()
+    return [
+        entry
+        for entry in entries
+        if int(entry.get("year", 0)) == selected_year
+        and str(entry.get("level", "")).upper() == selected_level
+    ]
+
+
 @dataclass
 class ArticleBankAnalysis:
     entry: dict[str, Any]
@@ -163,6 +178,7 @@ class BankAnalysis:
     articles: list[ArticleBankAnalysis]
     knowledge_points: list[BankKnowledgePoint]
     practice: list[BankPracticeQuestion]
+    source_label: str
     disclaimer: str
 
     @property
@@ -175,6 +191,7 @@ class BankAnalysis:
             "level": self.level,
             "total_articles": len(self.articles),
             "total_questions": self.total_questions,
+            "source_label": self.source_label,
             "disclaimer": self.disclaimer,
             "articles": [
                 {
@@ -242,12 +259,22 @@ def analyze_exam_bank(
     selected_years = sorted(
         {int(entry.get("year", 0)) for entry in entries if entry.get("year")}
     )
+    official = bool(entries) and all(
+        entry.get("source_type") == "official" for entry in entries
+    )
+    source_label = "授权真题" if official else "原创模拟题"
+    disclaimer = (
+        "当前题目标记为已授权真题；请保留原始来源与使用许可。"
+        if official
+        else "当前题库为原创模拟题，不是历年真题。真题检索功能需要导入有授权的数据。"
+    )
     return BankAnalysis(
         selected_years=selected_years,
         level=level or "混合等级",
         articles=article_results,
         knowledge_points=knowledge_points,
         practice=practice,
-        disclaimer="题库为按近10年题型和难度编写的原创模拟题，不包含或复刻受版权保护的历年真题。",
+        source_label=source_label,
+        disclaimer=disclaimer,
     )
 
