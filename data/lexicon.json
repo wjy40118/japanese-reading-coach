@@ -1,0 +1,182 @@
+[
+  {
+    "term": "精いっぱい",
+    "reading": "せいいっぱい",
+    "meaning": "竭尽全力；能做的最大限度。",
+    "estimated_level": "N3",
+    "example": "今できることを精いっぱいやる。",
+    "confidence": 0.86,
+    "exam_frequency": 3
+  },
+  {
+    "term": "気づく",
+    "reading": "きづく",
+    "meaning": "注意到、察觉到。",
+    "estimated_level": "N4",
+    "example": "自分の間違いに気づいた。",
+    "confidence": 0.82,
+    "exam_frequency": 4
+  },
+  {
+    "term": "覚える",
+    "reading": "おぼえる",
+    "meaning": "记住；学会；感到。",
+    "estimated_level": "N5",
+    "example": "新しい単語を覚える。",
+    "confidence": 0.82,
+    "exam_frequency": 5
+  },
+  {
+    "term": "言葉",
+    "reading": "ことば",
+    "meaning": "语言、词语、说法。",
+    "estimated_level": "N4",
+    "example": "言葉の使い方を確認する。",
+    "confidence": 0.8,
+    "exam_frequency": 4
+  },
+  {
+    "term": "文章",
+    "reading": "ぶんしょう",
+    "meaning": "文章、篇章。",
+    "estimated_level": "N3",
+    "example": "文章の流れをつかむ。",
+    "confidence": 0.85,
+    "exam_frequency": 3
+  },
+  {
+    "term": "小説",
+    "reading": "しょうせつ",
+    "meaning": "小说。",
+    "estimated_level": "N3",
+    "example": "好きな小説を読む。",
+    "confidence": 0.85,
+    "exam_frequency": 3
+  },
+  {
+    "term": "習慣",
+    "reading": "しゅうかん",
+    "meaning": "习惯。",
+    "estimated_level": "N3",
+    "example": "毎朝日本語を読む習慣がある。",
+    "confidence": 0.84,
+    "exam_frequency": 3
+  },
+  {
+    "term": "増える",
+    "reading": "ふえる",
+    "meaning": "增加、增多。",
+    "estimated_level": "N4",
+    "example": "日本語の本が増えた。",
+    "confidence": 0.8,
+    "exam_frequency": 5
+  },
+  {
+    "term": "減る",
+    "reading": "へる",
+    "meaning": "减少。",
+    "estimated_level": "N4",
+    "example": "間違いが減った。",
+    "confidence": 0.8,
+    "exam_frequency": 4
+  },
+  {
+    "term": "にぎわう",
+    "reading": "にぎわう",
+    "meaning": "热闹、繁荣。",
+    "estimated_level": "N2",
+    "example": "駅前は毎朝にぎわっている。",
+    "confidence": 0.82,
+    "exam_frequency": 2
+  },
+  {
+    "term": "焼く",
+    "reading": "やく",
+    "meaning": "烤、烧、制作烘焙食品。",
+    "estimated_level": "N4",
+    "example": "パンを焼く。",
+    "confidence": 0.82,
+    "exam_frequency": 3
+  },
+  {
+    "term": "種類",
+    "reading": "しゅるい",
+    "meaning": "种类。",
+    "estimated_level": "N3",
+    "example": "パンの種類が増えた。",
+    "confidence": 0.84,
+    "exam_frequency": 4
+  },
+  {
+    "term": "客",
+    "reading": "きゃく",
+    "meaning": "客人、顾客。",
+    "estimated_level": "N4",
+    "example": "客の話を聞く。",
+    "confidence": 0.78,
+    "exam_frequency": 3
+  },
+  {
+    "term": "最近",
+    "reading": "さいきん",
+    "meaning": "最近、近来。",
+    "estimated_level": "N4",
+    "example": "最近、日本語を読む時間が増えた。",
+    "confidence": 0.82,
+    "exam_frequency": 5
+  },
+  {
+    "term": "文化",
+    "reading": "ぶんか",
+    "meaning": "文化。",
+    "estimated_level": "N4",
+    "example": "日本の文化について学ぶ。",
+    "confidence": 0.8,
+    "exam_frequency": 3
+  },
+  {
+    "term": "経験",
+    "reading": "けいけん",
+    "meaning": "经验、经历。",
+    "estimated_level": "N3",
+    "example": "海外で生活した経験がある。",
+    "confidence": 0.82,
+    "exam_frequency": 4
+  },
+  {
+    "term": "内容",
+    "reading": "ないよう",
+    "meaning": "内容。",
+    "estimated_level": "N3",
+    "example": "文章の内容をまとめる。",
+    "confidence": 0.84,
+    "exam_frequency": 4
+  },
+  {
+    "term": "理解",
+    "reading": "りかい",
+    "meaning": "理解。",
+    "estimated_level": "N3",
+    "example": "文脈から意味を理解する。",
+    "confidence": 0.84,
+    "exam_frequency": 5
+  },
+  {
+    "term": "表現",
+    "reading": "ひょうげん",
+    "meaning": "表达、表现方式。",
+    "estimated_level": "N3",
+    "example": "自然な表現を覚える。",
+    "confidence": 0.82,
+    "exam_frequency": 4
+  },
+  {
+    "term": "意味",
+    "reading": "いみ",
+    "meaning": "意思、意义。",
+    "estimated_level": "N4",
+    "example": "この言葉の意味を調べる。",
+    "confidence": 0.8,
+    "exam_frequency": 5
+  }
+]

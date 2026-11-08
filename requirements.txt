@@ -1,0 +1,4 @@
+streamlit>=1.40,<2
+sudachipy>=0.7.0
+sudachidict_core
+

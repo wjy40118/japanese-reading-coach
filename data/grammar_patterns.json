@@ -1,0 +1,352 @@
+[
+  {
+    "term": "だけで精いっぱい",
+    "kind": "grammar",
+    "estimated_level": "N3",
+    "explanation": "表示光是做某件事就已经用尽全力，带有能力或精力已经到达上限的感觉。",
+    "structure": "动词普通形 + だけで精いっぱいだ",
+    "example": "毎日の宿題を終わらせるだけで精いっぱいだ。",
+    "confidence": 0.9,
+    "exam_frequency": 4,
+    "quiz": {
+      "question": "「だけで精いっぱい」最接近下面哪个意思？",
+      "options": [
+        "只需要做这一件事",
+        "光是做这件事就已经很吃力",
+        "做这件事非常轻松"
+      ],
+      "answer_index": 1,
+      "explanation": "这个表达强调能力或精力只能应付到当前这件事。"
+    }
+  },
+  {
+    "term": "ようになってから",
+    "kind": "grammar",
+    "estimated_level": "N3",
+    "explanation": "表示某种能力、习惯或状态发生变化之后，另一个变化也开始出现。",
+    "structure": "动词辞书形 + ようになってから",
+    "example": "日本語で日記を書くようになってから、表現に興味を持った。",
+    "confidence": 0.88,
+    "exam_frequency": 5,
+    "quiz": {
+      "question": "「読むようになってから」中的「ようになってから」主要表示什么？",
+      "options": [
+        "阅读能力或习惯发生变化之后",
+        "读完了一本书以后",
+        "为了阅读而做准备"
+      ],
+      "answer_index": 0,
+      "explanation": "「ようになる」表示能力或习惯的变化。"
+    }
+  },
+  {
+    "term": "にもかかわらず",
+    "kind": "grammar",
+    "estimated_level": "N2",
+    "explanation": "表示前项事实与后项结果形成强烈反差，相当于“尽管……却……”。",
+    "structure": "普通形 + にもかかわらず",
+    "example": "雨にもかかわらず、試合は行われた。",
+    "confidence": 0.92,
+    "exam_frequency": 4,
+    "quiz": {
+      "question": "「雨にもかかわらず、試合は行われた」表达什么关系？",
+      "options": [
+        "因为下雨，所以比赛中止",
+        "尽管下雨，比赛仍然举行",
+        "雨停之后，比赛开始"
+      ],
+      "answer_index": 1,
+      "explanation": "「にもかかわらず」连接出乎预期的相反事实。"
+    }
+  },
+  {
+    "term": "ざるを得ない",
+    "kind": "grammar",
+    "estimated_level": "N2",
+    "explanation": "表示没有其他选择，只能这样做，语气较正式。",
+    "structure": "动词ない形去掉「ない」 + ざるを得ない",
+    "example": "事情が変わったので、計画を修正せざるを得ない。",
+    "confidence": 0.9,
+    "exam_frequency": 3,
+    "quiz": {
+      "question": "「修正せざるを得ない」最接近哪个意思？",
+      "options": [
+        "完全不想修正",
+        "没有别的办法，只能修正",
+        "已经完成修正"
+      ],
+      "answer_index": 1,
+      "explanation": "这个句型表示因客观情况而不得不采取行动。"
+    }
+  },
+  {
+    "term": "わけではない",
+    "kind": "grammar",
+    "estimated_level": "N3",
+    "explanation": "表示部分否定，说明前项并不是全部情况。",
+    "structure": "普通形 + わけではない",
+    "example": "日本語が難しいからといって、嫌いなわけではない。",
+    "confidence": 0.86,
+    "exam_frequency": 4,
+    "quiz": {
+      "question": "「嫌いなわけではない」是什么意思？",
+      "options": [
+        "非常喜欢",
+        "并不是讨厌",
+        "已经完全放弃"
+      ],
+      "answer_index": 1,
+      "explanation": "「わけではない」否定的是一个整体判断。"
+    }
+  },
+  {
+    "term": "ことができる",
+    "kind": "grammar",
+    "estimated_level": "N4",
+    "explanation": "表示能力或可能性，相当于“能够……”。",
+    "structure": "动词辞书形 + ことができる",
+    "example": "この図書館では日本語の本を借りることができる。",
+    "confidence": 0.82,
+    "exam_frequency": 5,
+    "quiz": {
+      "question": "「借りることができる」表示什么？",
+      "options": [
+        "能够借阅",
+        "已经借完",
+        "被禁止借阅"
+      ],
+      "answer_index": 0,
+      "explanation": "「ことができる」表示能力或条件允许。"
+    }
+  },
+  {
+    "term": "ながら",
+    "kind": "grammar",
+    "estimated_level": "N4",
+    "explanation": "表示两个由同一主体同时进行的动作。",
+    "structure": "动词ます形去掉「ます」 + ながら",
+    "example": "音楽を聞きながら、宿題をする。",
+    "confidence": 0.78,
+    "exam_frequency": 5,
+    "quiz": {
+      "question": "「話を聞きながら」表示什么？",
+      "options": [
+        "先听完再做事",
+        "一边听一边做另一件事",
+        "听完之后马上离开"
+      ],
+      "answer_index": 1,
+      "explanation": "「ながら」表示同一主体的两个动作同时发生。"
+    }
+  },
+  {
+    "term": "そうだ",
+    "kind": "structure",
+    "estimated_level": "N3",
+    "explanation": "接在普通形后常表示传闻，相当于“听说……”。需要结合上下文区分传闻、样态等用法。",
+    "structure": "普通形 + そうだ（传闻）",
+    "example": "明日は雪が降るそうだ。",
+    "confidence": 0.66,
+    "exam_frequency": 5,
+    "quiz": {
+      "question": "「変えているそうだ」中的「そうだ」更接近哪种用法？",
+      "options": [
+        "看起来马上就要改变",
+        "听说正在改变",
+        "已经改变完了"
+      ],
+      "answer_index": 1,
+      "explanation": "在普通形后表示传闻，信息来源需要由上下文确认。"
+    }
+  },
+  {
+    "term": "ていく",
+    "kind": "grammar",
+    "estimated_level": "N3",
+    "explanation": "表示动作或变化从现在向未来持续、发展。",
+    "structure": "动词て形 + いく",
+    "example": "これからも日本語を勉強していく。",
+    "confidence": 0.74,
+    "exam_frequency": 4,
+    "quiz": {
+      "question": "「買っていく」在这里最可能表达什么？",
+      "options": [
+        "买完再回来",
+        "买了之后离开或带走",
+        "完全不买"
+      ],
+      "answer_index": 1,
+      "explanation": "「ていく」可以表示动作的方向或从当前向后的发展。"
+    }
+  },
+  {
+    "term": "に対して",
+    "kind": "cohesion",
+    "estimated_level": "N3",
+    "explanation": "表示动作、态度或比较所指向的对象，也可以表示对比。",
+    "structure": "名词 + に対して",
+    "example": "先生に対して、失礼な言い方をしてはいけない。",
+    "confidence": 0.72,
+    "exam_frequency": 4
+  },
+  {
+    "term": "について",
+    "kind": "cohesion",
+    "estimated_level": "N4",
+    "explanation": "表示谈论、思考或调查的主题，相当于“关于……”。",
+    "structure": "名词 + について",
+    "example": "日本の文化について調べている。",
+    "confidence": 0.72,
+    "exam_frequency": 5
+  },
+  {
+    "term": "によって",
+    "kind": "cohesion",
+    "estimated_level": "N3",
+    "explanation": "可表示动作主体、原因、手段或根据，具体含义需要由句子决定。",
+    "structure": "名词 + によって",
+    "example": "この問題は先生によって説明された。",
+    "confidence": 0.7,
+    "exam_frequency": 5
+  },
+  {
+    "term": "ようにする",
+    "kind": "grammar",
+    "estimated_level": "N4",
+    "explanation": "表示有意识地努力做到某种行为或状态。",
+    "structure": "动词辞书形/ない形 + ようにする",
+    "example": "毎日、日本語を少しずつ読むようにしている。",
+    "confidence": 0.78,
+    "exam_frequency": 4
+  },
+  {
+    "term": "かもしれない",
+    "kind": "grammar",
+    "estimated_level": "N4",
+    "explanation": "表示不确定的推测，语气比「でしょう」更保留。",
+    "structure": "普通形 + かもしれない",
+    "example": "この表現はN3かもしれない。",
+    "confidence": 0.8,
+    "exam_frequency": 5
+  },
+  {
+    "term": "を皮切りに",
+    "kind": "grammar",
+    "estimated_level": "N1",
+    "explanation": "表示以某件事为开端，之后同类事情接连展开。",
+    "structure": "名词 + を皮切りに",
+    "example": "このイベントを皮切りに、各地で説明会が開かれる。",
+    "confidence": 0.86,
+    "exam_frequency": 3,
+    "quiz": {
+      "question": "「この活動を皮切りに」表达什么关系？",
+      "options": [
+        "以这项活动为开端，之后继续展开",
+        "这项活动结束以后停止",
+        "在活动之前进行准备"
+      ],
+      "answer_index": 0,
+      "explanation": "「を皮切りに」表示后续发展的起点。"
+    }
+  },
+  {
+    "term": "に先立って",
+    "kind": "grammar",
+    "estimated_level": "N1",
+    "explanation": "表示在某个重要事件或行动之前先做另一件事。",
+    "structure": "名词/动词辞书形 + に先立って",
+    "example": "会議に先立って、資料を確認した。",
+    "confidence": 0.86,
+    "exam_frequency": 3,
+    "quiz": {
+      "question": "「説明会に先立って」是什么意思？",
+      "options": [
+        "说明会结束之后",
+        "在说明会之前",
+        "和说明会同时进行"
+      ],
+      "answer_index": 1,
+      "explanation": "「に先立って」表示前项先于后项发生。"
+    }
+  },
+  {
+    "term": "なくしては",
+    "kind": "grammar",
+    "estimated_level": "N1",
+    "explanation": "表示如果没有某事物，后项就不可能成立。",
+    "structure": "名词 + なくしては",
+    "example": "住民の協力なくしては、活動を続けられない。",
+    "confidence": 0.88,
+    "exam_frequency": 3,
+    "quiz": {
+      "question": "「協力なくしては続けられない」表达什么？",
+      "options": [
+        "没有合作就无法继续",
+        "合作以后才停止",
+        "合作并不重要"
+      ],
+      "answer_index": 0,
+      "explanation": "「なくしては」后接否定，强调必要条件。"
+    }
+  },
+  {
+    "term": "をめぐって",
+    "kind": "grammar",
+    "estimated_level": "N2",
+    "explanation": "表示围绕某个问题、主题产生讨论、争论或不同意见。",
+    "structure": "名词 + をめぐって",
+    "example": "新しい制度をめぐって、意見が分かれている。",
+    "confidence": 0.84,
+    "exam_frequency": 4,
+    "quiz": {
+      "question": "「導入をめぐって意見が分かれている」表示什么？",
+      "options": [
+        "围绕导入问题意见不一",
+        "导入以后所有人赞成",
+        "完全没有人讨论导入"
+      ],
+      "answer_index": 0,
+      "explanation": "「をめぐって」表示围绕某议题展开讨论。"
+    }
+  },
+  {
+    "term": "に伴って",
+    "kind": "grammar",
+    "estimated_level": "N2",
+    "explanation": "表示随着前项变化，后项也相应发生变化。",
+    "structure": "名词/动词辞书形 + に伴って",
+    "example": "技術の進歩に伴って、働き方も変わった。",
+    "confidence": 0.84,
+    "exam_frequency": 4,
+    "quiz": {
+      "question": "「技術の進歩に伴って」表示什么关系？",
+      "options": [
+        "技术进步以后，后项同时变化",
+        "技术进步之前，后项已经停止",
+        "技术进步与后项完全无关"
+      ],
+      "answer_index": 0,
+      "explanation": "「に伴って」表示伴随变化。"
+    }
+  },
+  {
+    "term": "つつある",
+    "kind": "grammar",
+    "estimated_level": "N2",
+    "explanation": "表示某变化正在持续进行，语气较书面。",
+    "structure": "动词ます形去掉「ます」 + つつある",
+    "example": "地域の取り組みは広がりつつある。",
+    "confidence": 0.82,
+    "exam_frequency": 3,
+    "quiz": {
+      "question": "「広がりつつある」表示什么？",
+      "options": [
+        "正在逐渐扩大",
+        "已经完全停止",
+        "将来才会开始"
+      ],
+      "answer_index": 0,
+      "explanation": "「つつある」表示变化正在进行。"
+    }
+  }
+]
