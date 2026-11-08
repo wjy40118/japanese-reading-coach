@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+import hmac
 import json
+import os
 
 import streamlit as st
 
@@ -138,6 +140,40 @@ DATA_VERSION = "2026-11-09-official-samples-v6"
 def frequency_stars(value: int) -> str:
     value = max(1, min(int(value), 5))
     return "★" * value + "☆" * (5 - value)
+
+
+def private_password() -> str:
+    configured = os.getenv("PRIVATE_APP_PASSWORD", "").strip()
+    if configured:
+        return configured
+    try:
+        return str(st.secrets.get("PRIVATE_APP_PASSWORD", "")).strip()
+    except Exception:
+        return ""
+
+
+def enforce_private_access() -> bool:
+    expected = private_password()
+    if not expected:
+        return False
+    if st.session_state.get("private_authenticated"):
+        return True
+
+    st.title("私密访问")
+    st.write("该应用包含授权用途的题库或学习资料，请输入访问密码。")
+    with st.form("private_access_form"):
+        supplied = st.text_input("访问密码", type="password")
+        submitted = st.form_submit_button("进入应用", type="primary")
+    if submitted:
+        if hmac.compare_digest(supplied, expected):
+            st.session_state["private_authenticated"] = True
+            st.rerun()
+        st.error("密码不正确。")
+    st.stop()
+
+
+def logout_private() -> None:
+    st.session_state.pop("private_authenticated", None)
 
 
 @st.cache_data
@@ -628,6 +664,7 @@ def render_official_sample(resource: OfficialSampleResource) -> None:
 
 
 def main() -> None:
+    private_enabled = enforce_private_access()
     st.markdown('<div class="hero-kicker">READING COACH</div>', unsafe_allow_html=True)
     st.title("日文阅读拆解教练")
     st.write(
@@ -642,6 +679,12 @@ def main() -> None:
 
     with st.sidebar:
         st.header("分析设置")
+        if private_enabled:
+            st.button(
+                "退出私密访问",
+                on_click=logout_private,
+                width="stretch",
+            )
         mode_label = st.radio(
             "分析方式",
             [

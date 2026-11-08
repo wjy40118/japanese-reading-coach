@@ -69,6 +69,26 @@ streamlit run app.py
 
 官方公开样题不按考试年份逐年发布，因此官方样题模式按“等级 + 官方资料版本”检索。官方题面只通过 `www.jlpt.jp` 链接打开；如需生成知识点，用户可将官方阅读正文手动粘贴到“规则解析”。
 
+## 私密部署
+
+需要接入用户自行提供的真题 PDF 时，不要把文件放入公开仓库。项目已将 `private_data/` 加入 `.gitignore`。
+
+本地私密运行：
+
+```powershell
+$env:PRIVATE_APP_PASSWORD="设置一个足够长的访问密码"
+.\.venv\Scripts\python.exe -m streamlit run app.py
+```
+
+为私密网络中的其他授权用户提供访问时，可绑定本机网络地址：
+
+```powershell
+$env:PRIVATE_APP_PASSWORD="设置一个足够长的访问密码"
+.\.venv\Scripts\python.exe -m streamlit run app.py --server.address 0.0.0.0 --server.port 8501
+```
+
+更稳妥的方式是使用 Tailscale、ZeroTier 或 Cloudflare Access，只允许授权设备或账号进入。Streamlit Community Cloud 的公开网址即使增加密码门，也只属于原型级保护；不要将受限制的完整真题提交到公开 GitHub。
+
 设计文档中的“数据来源与许可”应写清楚：示例文章为合成的学习材料，词典和模型的实际许可需按其官方模型卡和数据来源逐项标注。不要直接保存用户文章，除非用户明确同意。
 
 ## 目录结构
