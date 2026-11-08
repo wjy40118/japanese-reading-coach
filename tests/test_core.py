@@ -107,7 +107,10 @@ class AnalyzerTests(unittest.TestCase):
 
     def test_rule_analyzer_does_not_invent_outside_lexicon(self) -> None:
         text = "青い空が広がっている。鳥が静かに飛んでいる。" * 4
-        result = self.analyzer.analyze(text)
+        result = self.analyzer.analyze(
+            text,
+            include_context_vocabulary=False,
+        )
         self.assertEqual(result.points, [])
         self.assertTrue(any("没有匹配" in warning for warning in result.warnings))
 
@@ -126,6 +129,16 @@ class AnalyzerTests(unittest.TestCase):
         mixed = annotate_japanese_in_mixed_text("请解释「読む」的意思。")
         self.assertIn("<ruby>読<rt>よ</rt></ruby>む", mixed)
         self.assertIn("请解释", mixed)
+
+    @unittest.skipUnless(furigana_available(), "SudachiPy dictionary is unavailable")
+    def test_single_article_returns_at_least_ten_points(self) -> None:
+        result = self.analyzer.analyze(
+            self.samples[0]["article"],
+            level="N3",
+            focus=["全部"],
+            max_points=10,
+        )
+        self.assertGreaterEqual(len(result.points), 10)
 
 
 if __name__ == "__main__":

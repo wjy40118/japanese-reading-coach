@@ -4,6 +4,7 @@ import json
 from pathlib import Path
 from typing import Any
 
+from .context_vocab import extract_context_vocabulary
 from .schema import AnalysisResult, KnowledgePoint, PracticeQuestion
 from .text_utils import (
     estimate_level,
@@ -63,7 +64,8 @@ class RuleBasedAnalyzer:
         *,
         level: str = "N3",
         focus: list[str] | None = None,
-        max_points: int = 6,
+        max_points: int = 10,
+        include_context_vocabulary: bool = True,
     ) -> AnalysisResult:
         focus = focus or ["全部"]
         error = validate_article(text)
@@ -145,6 +147,20 @@ class RuleBasedAnalyzer:
                 )
             )
             matched_terms.add(term)
+
+        if (
+            include_context_vocabulary
+            and len(points) < max_points
+            and self._matches_focus("vocabulary", focus)
+        ):
+            points.extend(
+                extract_context_vocabulary(
+                    text,
+                    level=level,
+                    excluded_terms=matched_terms,
+                    limit=max_points - len(points),
+                )
+            )
 
         sentences = split_sentences(text)
         terms = "、".join(point.term for point in points[:4])

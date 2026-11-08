@@ -189,6 +189,48 @@ def filter_result_by_level(result: AnalysisResult, level: str) -> AnalysisResult
     return result
 
 
+def ensure_minimum_points(
+    result: AnalysisResult,
+    article: str,
+    analyzer: RuleBasedAnalyzer,
+    *,
+    level: str,
+    focus: list[str],
+    minimum: int = 10,
+) -> AnalysisResult:
+    if len(result.points) >= minimum:
+        return result
+    supplement = analyzer.analyze(
+        article,
+        level=level,
+        focus=focus,
+        max_points=minimum,
+        include_context_vocabulary=True,
+    )
+    existing = {(point.kind, point.term) for point in result.points}
+    added = 0
+    for point in supplement.points:
+        key = (point.kind, point.term)
+        if key in existing:
+            continue
+        result.points.append(point)
+        existing.add(key)
+        added += 1
+        if len(result.points) >= minimum:
+            break
+    if added:
+        result.warnings.append(
+            f"为补足单篇分析粒度，额外加入了 {added} 个语境词汇候选；"
+            "这些候选需要结合上下文核验。"
+        )
+    if len(result.points) < minimum:
+        result.warnings.append(
+            f"当前文章只生成 {len(result.points)} 个可用知识点。"
+            f"文章较短时可能无法稳定达到 {minimum} 个，建议增加原文长度。"
+        )
+    return result
+
+
 def render_analysis(result: AnalysisResult, article: str) -> None:
     st.divider()
     st.subheader("分析结果")
@@ -205,7 +247,7 @@ def render_analysis(result: AnalysisResult, article: str) -> None:
     else:
         st.caption(f"当前结果来自本地开源模型：{result.mode.removeprefix('model:')}")
 
-    tabs = st.tabs(["文章概览", "知识点", "练习", "导出"])
+    tabs = st.tabs(["文章概览", "原文", "知识点", "练习", "导出"])
 
     with tabs[0]:
         st.markdown("### 文章摘要")
@@ -213,13 +255,16 @@ def render_analysis(result: AnalysisResult, article: str) -> None:
         if result.warnings:
             for warning in result.warnings:
                 st.warning(warning)
-        with st.expander("查看原文"):
-            st.markdown(
-                f'<div class="furigana-text">{annotate_japanese(article)}</div>',
-                unsafe_allow_html=True,
-            )
 
     with tabs[1]:
+        st.markdown("### 原文与汉字注音")
+        st.markdown(
+            f'<div class="furigana-text furigana-panel">'
+            f"{annotate_japanese(article)}</div>",
+            unsafe_allow_html=True,
+        )
+
+    with tabs[2]:
         if not result.points:
             st.info("没有识别出可展示的知识点。请缩短文章或切换到模型模式。")
         for index, point in enumerate(result.points, start=1):
@@ -269,7 +314,7 @@ def render_analysis(result: AnalysisResult, article: str) -> None:
                     f"置信度：{point.confidence:.0%}"
                 )
 
-    with tabs[2]:
+    with tabs[3]:
         if not result.practice:
             st.info("这一模式暂未生成练习。示例案例和本地模型模式包含练习题。")
         else:
@@ -304,7 +349,7 @@ def render_analysis(result: AnalysisResult, article: str) -> None:
                         unsafe_allow_html=True,
                     )
 
-    with tabs[3]:
+    with tabs[4]:
         payload = json.dumps(result.to_dict(), ensure_ascii=False, indent=2)
         st.download_button(
             "下载 JSON 分析结果",
@@ -694,6 +739,13 @@ def main() -> None:
             if result is None:
                 raise RuntimeError("没有生成分析结果")
             result = filter_result_by_level(result, level)
+            result = ensure_minimum_points(
+                result,
+                article,
+                analyzer,
+                level=level,
+                focus=focus,
+            )
             st.session_state["analysis"] = result
             st.session_state["last_analysis_level"] = level
             st.session_state["last_article"] = article

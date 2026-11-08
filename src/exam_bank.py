@@ -196,7 +196,7 @@ def analyze_exam_bank(
     *,
     level: str | None = None,
     focus: list[str] | None = None,
-    max_points_per_article: int = 6,
+    max_points_per_article: int = 10,
 ) -> BankAnalysis:
     article_results: list[ArticleBankAnalysis] = []
     point_index: dict[tuple[str, str], BankKnowledgePoint] = {}
@@ -210,6 +210,7 @@ def analyze_exam_bank(
             level=level or str(entry.get("level", "N3")),
             focus=focus,
             max_points=max_points_per_article,
+            include_context_vocabulary=False,
         )
         article_results.append(ArticleBankAnalysis(entry=entry, analysis=result))
 
