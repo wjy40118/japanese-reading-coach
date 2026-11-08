@@ -4,6 +4,14 @@ from dataclasses import asdict, dataclass, field
 from typing import Any
 
 
+def coerce_exam_frequency(value: Any, default: int = 3) -> int:
+    try:
+        parsed = int(value)
+    except (TypeError, ValueError):
+        parsed = default
+    return max(1, min(parsed, 5))
+
+
 @dataclass
 class KnowledgePoint:
     kind: str
@@ -19,10 +27,9 @@ class KnowledgePoint:
 
     @classmethod
     def from_dict(cls, payload: dict[str, Any]) -> "KnowledgePoint":
-        frequency = int(
+        frequency = coerce_exam_frequency(
             payload.get("exam_frequency", payload.get("frequency", 3))
         )
-        frequency = max(1, min(frequency, 5))
         return cls(
             kind=str(payload.get("kind", "other")),
             term=str(payload.get("term", "")),

@@ -15,6 +15,7 @@ from src.llm_analyzer import (
     LocalTransformersAnalyzer,
     local_model_dependencies_available,
 )
+from src.n2_frequency import build_n2_matcher, load_n2_frequency_data
 from src.official_samples import (
     OfficialSampleResource,
     load_official_catalog,
@@ -22,7 +23,7 @@ from src.official_samples import (
 )
 from src.rule_analyzer import RuleBasedAnalyzer
 from src.samples import load_samples, sample_to_result
-from src.schema import AnalysisResult
+from src.schema import AnalysisResult, coerce_exam_frequency
 from src.text_utils import (
     japanese_character_count,
     level_matches,
@@ -104,6 +105,14 @@ st.markdown(
       .knowledge-note strong {
         color: #a93623;
       }
+      .exam-hit {
+        background: #ffe58f;
+        color: #5b4300;
+        padding: 0.03em 0.2em;
+        border-radius: 0.2em;
+        box-decoration-break: clone;
+        -webkit-box-decoration-break: clone;
+      }
       ruby {
         ruby-position: over;
       }
@@ -134,11 +143,11 @@ KIND_LABELS = {
     "cohesion": "篇章连接",
     "other": "其他",
 }
-DATA_VERSION = "2026-11-09-official-samples-v6"
+DATA_VERSION = "2026-11-09-n2-highlight-v8"
 
 
 def frequency_stars(value: int) -> str:
-    value = max(1, min(int(value), 5))
+    value = coerce_exam_frequency(value)
     return "★" * value + "☆" * (5 - value)
 
 
@@ -195,6 +204,12 @@ def get_official_catalog(data_version: str):
 
 
 @st.cache_resource
+def get_n2_high_frequency_matcher(data_version: str):
+    del data_version
+    return build_n2_matcher(load_n2_frequency_data())
+
+
+@st.cache_resource
 def get_model_analyzer() -> LocalTransformersAnalyzer:
     return LocalTransformersAnalyzer()
 
@@ -211,6 +226,10 @@ def migrate_result(result):
     if result is None:
         return None
     points = getattr(result, "points", [])
+    for point in points:
+        point.exam_frequency = coerce_exam_frequency(
+            getattr(point, "exam_frequency", 3)
+        )
     if all(hasattr(point, "exam_frequency") for point in points):
         return result
 
@@ -270,7 +289,7 @@ def enrich_analysis_points(
         )
     result.points.sort(
         key=lambda point: (
-            -getattr(point, "exam_frequency", 3),
+            -coerce_exam_frequency(getattr(point, "exam_frequency", 3)),
             -getattr(point, "confidence", 0.0),
             getattr(point, "term", ""),
         )
@@ -297,7 +316,11 @@ def points_for_sentence(sentence: str, points) -> list:
     return matched
 
 
-def render_analysis(result: AnalysisResult, article: str) -> None:
+def render_analysis(
+    result: AnalysisResult,
+    article: str,
+    n2_matcher,
+) -> None:
     st.divider()
     st.subheader("分析结果")
 
@@ -328,9 +351,18 @@ def render_analysis(result: AnalysisResult, article: str) -> None:
             matched_points = points_for_sentence(sentence, result.points)
             notes = []
             for point in matched_points:
+                term_markup = annotate_japanese(point.term)
+                is_n2_hit = (
+                    point.kind in {"grammar", "structure", "cohesion"}
+                    and n2_matcher(point.term)
+                )
+                if is_n2_hit:
+                    term_markup = (
+                        f'<span class="exam-hit">{term_markup}</span>'
+                    )
                 notes.append(
                     f"{KIND_LABELS.get(point.kind, point.kind)}・"
-                    f"{annotate_japanese(point.term)} "
+                    f"{term_markup} "
                     f"{frequency_stars(getattr(point, 'exam_frequency', 3))}"
                 )
             note_html = (
@@ -355,10 +387,21 @@ def render_analysis(result: AnalysisResult, article: str) -> None:
             with st.container(border=True):
                 left, right = st.columns([4, 1])
                 with left:
+                    term_markup = annotate_japanese(point.term)
+                    is_n2_hit = (
+                        point.kind in {"grammar", "structure", "cohesion"}
+                        and n2_matcher(point.term)
+                    )
+                    if is_n2_hit:
+                        term_markup = (
+                            f'<span class="exam-hit">{term_markup}</span>'
+                        )
                     st.markdown(
-                        f"#### {index}. {annotate_japanese(point.term)}",
+                        f"#### {index}. {term_markup}",
                         unsafe_allow_html=True,
                     )
+                    if is_n2_hit:
+                        st.caption("命中 N2 高频语法 PDF｜黄色高亮")
                     if (
                         point.kind == "vocabulary"
                         and not getattr(point, "reading", "").strip()
@@ -672,6 +715,7 @@ def main() -> None:
     samples = get_samples(DATA_VERSION)
     analyzer = get_rule_analyzer(DATA_VERSION)
     official_catalog = get_official_catalog(DATA_VERSION)
+    n2_matcher = get_n2_high_frequency_matcher(DATA_VERSION)
     model_deps_ready = local_model_dependencies_available()
 
     with st.sidebar:
@@ -916,7 +960,7 @@ def main() -> None:
     if official_result:
         render_official_sample(official_result)
     elif result:
-        render_analysis(result, last_article)
+        render_analysis(result, last_article, n2_matcher)
     else:
         st.info("选择分析模式后，点击对应按钮开始。")
 

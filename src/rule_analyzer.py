@@ -5,7 +5,12 @@ from pathlib import Path
 from typing import Any
 
 from .context_vocab import extract_context_vocabulary
-from .schema import AnalysisResult, KnowledgePoint, PracticeQuestion
+from .schema import (
+    AnalysisResult,
+    KnowledgePoint,
+    PracticeQuestion,
+    coerce_exam_frequency,
+)
 from .text_utils import (
     estimate_level,
     level_matches,
@@ -55,8 +60,9 @@ class RuleBasedAnalyzer:
 
     @staticmethod
     def _frequency(payload: dict[str, Any]) -> int:
-        value = int(payload.get("exam_frequency", payload.get("frequency", 3)))
-        return max(1, min(value, 5))
+        return coerce_exam_frequency(
+            payload.get("exam_frequency", payload.get("frequency", 3))
+        )
 
     def analyze(
         self,
@@ -168,7 +174,7 @@ class RuleBasedAnalyzer:
 
         points.sort(
             key=lambda point: (
-                -point.exam_frequency,
+                -coerce_exam_frequency(point.exam_frequency),
                 -point.confidence,
                 point.term,
             )
