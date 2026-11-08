@@ -143,8 +143,8 @@ KIND_LABELS = {
     "cohesion": "篇章连接",
     "other": "其他",
 }
-DATA_VERSION = "2026-11-09-rule-practice-v9"
-APP_SESSION_VERSION = "2026-11-09-rule-practice-v1"
+DATA_VERSION = "2026-11-09-vocabulary-meaning-v10"
+APP_SESSION_VERSION = "2026-11-09-vocabulary-meaning-v1"
 
 
 def frequency_stars(value: int) -> str:

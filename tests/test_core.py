@@ -147,11 +147,31 @@ class AnalyzerTests(unittest.TestCase):
             level="N3",
             focus=["全部"],
         )
-        self.assertGreaterEqual(len(result.practice), 10)
+        self.assertTrue(result.practice)
         for question in result.practice:
             self.assertGreaterEqual(len(question.options), 3)
             self.assertGreaterEqual(question.answer_index, 0)
             self.assertLess(question.answer_index, len(question.options))
+            self.assertNotIn("哪类词", question.question)
+            self.assertNotIn("词性", question.question)
+
+    def test_vocabulary_practice_uses_meanings(self) -> None:
+        result = self.analyzer.analyze(
+            "新しい言葉の意味を理解し、文章の内容を表現する。" * 3,
+            level="N3",
+            focus=["词汇"],
+            include_context_vocabulary=False,
+        )
+        vocabulary_questions = [
+            question
+            for question in result.practice
+            if "意思" in question.question
+        ]
+        self.assertTrue(vocabulary_questions)
+        for question in vocabulary_questions:
+            self.assertTrue(
+                all(option for option in question.options),
+            )
 
     def test_single_grammar_point_still_generates_practice(self) -> None:
         result = self.analyzer.analyze(

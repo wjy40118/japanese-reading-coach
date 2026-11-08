@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import json
-import re
 from pathlib import Path
 from typing import Any
 
@@ -80,43 +79,26 @@ class RuleBasedAnalyzer:
         vocabulary_explanations = [
             point.explanation
             for point in points
-            if point.kind == "vocabulary" and point.explanation
+            if point.kind == "vocabulary"
+            and point.explanation
+            and not point.explanation.startswith("语境词汇")
         ]
-        pos_options = ["名词", "动词", "形容词", "副词"]
 
         for point in points:
             if point.term in existing_terms:
                 continue
 
-            pos_match = re.search(
-                r"语境词汇（(名词|动词|形容词|副词)）",
-                point.explanation,
-            )
-            if pos_match:
-                correct_pos = pos_match.group(1)
-                questions.append(
-                    PracticeQuestion(
-                        question=f"「{point.term}」在文中属于哪类词？",
-                        options=list(pos_options),
-                        answer_index=pos_options.index(correct_pos),
-                        explanation=point.explanation,
-                    )
-                )
-                continue
-
             if point.kind == "vocabulary":
+                if point.explanation.startswith("语境词汇"):
+                    continue
                 correct = point.explanation
                 distractors = [
                     text
                     for text in vocabulary_explanations
                     if text and text != correct
                 ][:2]
-                distractors.extend(
-                    [
-                        "文中没有对应的具体含义",
-                        "与当前句子语境无关的用法",
-                    ][: 2 - len(distractors)]
-                )
+                if len(distractors) < 2:
+                    continue
                 options = [correct, *distractors]
                 shift = len(questions) % len(options)
                 options = options[shift:] + options[:shift]
