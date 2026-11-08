@@ -153,6 +153,15 @@ class AnalyzerTests(unittest.TestCase):
             self.assertGreaterEqual(question.answer_index, 0)
             self.assertLess(question.answer_index, len(question.options))
 
+    def test_single_grammar_point_still_generates_practice(self) -> None:
+        result = self.analyzer.analyze(
+            "先生に対して、失礼な言い方をしてはいけない。" * 3,
+            level="N3",
+            focus=["篇章"],
+        )
+        self.assertTrue(result.practice)
+        self.assertGreaterEqual(len(result.practice[0].options), 3)
+
 
 if __name__ == "__main__":
     unittest.main()

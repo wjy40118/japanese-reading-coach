@@ -143,7 +143,8 @@ KIND_LABELS = {
     "cohesion": "篇章连接",
     "other": "其他",
 }
-DATA_VERSION = "2026-11-09-n2-highlight-v8"
+DATA_VERSION = "2026-11-09-rule-practice-v9"
+APP_SESSION_VERSION = "2026-11-09-rule-practice-v1"
 
 
 def frequency_stars(value: int) -> str:
@@ -294,6 +295,25 @@ def enrich_analysis_points(
             getattr(point, "term", ""),
         )
     )
+    return result
+
+
+def ensure_rule_practice(
+    result: AnalysisResult,
+    article: str,
+    analyzer: RuleBasedAnalyzer,
+    focus: list[str],
+) -> AnalysisResult:
+    if result.mode != "rule" or result.practice:
+        return result
+    regenerated = analyzer.analyze(
+        article,
+        level=result.estimated_level,
+        focus=focus,
+    )
+    if regenerated.practice:
+        result.practice = regenerated.practice
+        result.warnings.append("已为旧版规则分析结果重新生成知识点练习。")
     return result
 
 
@@ -705,6 +725,11 @@ def render_official_sample(resource: OfficialSampleResource) -> None:
 
 def main() -> None:
     private_enabled = enforce_private_access()
+    if st.session_state.get("app_session_version") != APP_SESSION_VERSION:
+        st.session_state.pop("analysis", None)
+        st.session_state.pop("last_article", None)
+        st.session_state.pop("last_analysis_level", None)
+        st.session_state["app_session_version"] = APP_SESSION_VERSION
     st.markdown('<div class="hero-kicker">READING COACH</div>', unsafe_allow_html=True)
     st.title("日文阅读拆解教练")
     st.write(
@@ -941,9 +966,16 @@ def main() -> None:
             st.info("可以切换到演示案例或规则解析继续体验。")
 
     result = migrate_result(st.session_state.get("analysis"))
+    last_article = st.session_state.get("last_article", article)
+    if result is not None:
+        result = ensure_rule_practice(
+            result,
+            last_article,
+            analyzer,
+            focus,
+        )
     if result is not None:
         st.session_state["analysis"] = result
-    last_article = st.session_state.get("last_article", article)
     official_result = None
     if (
         matched_official_resource

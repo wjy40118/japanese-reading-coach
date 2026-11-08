@@ -111,8 +111,12 @@ class RuleBasedAnalyzer:
                     for text in vocabulary_explanations
                     if text and text != correct
                 ][:2]
-                if len(distractors) < 2:
-                    continue
+                distractors.extend(
+                    [
+                        "文中没有对应的具体含义",
+                        "与当前句子语境无关的用法",
+                    ][: 2 - len(distractors)]
+                )
                 options = [correct, *distractors]
                 shift = len(questions) % len(options)
                 options = options[shift:] + options[:shift]
@@ -132,8 +136,12 @@ class RuleBasedAnalyzer:
                 for text in grammar_explanations
                 if text and text != correct
             ][:2]
-            if len(distractors) < 2:
-                continue
+            distractors.extend(
+                [
+                    "表示与原文语境相反的判断",
+                    "解释文章中未出现的内容",
+                ][: 2 - len(distractors)]
+            )
             options = [correct, *distractors]
             shift = len(questions) % len(options)
             options = options[shift:] + options[:shift]
