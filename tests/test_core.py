@@ -131,14 +131,15 @@ class AnalyzerTests(unittest.TestCase):
         self.assertIn("请解释", mixed)
 
     @unittest.skipUnless(furigana_available(), "SudachiPy dictionary is unavailable")
-    def test_single_article_returns_at_least_ten_points(self) -> None:
+    def test_single_article_returns_all_points_sorted_by_frequency(self) -> None:
         result = self.analyzer.analyze(
             self.samples[0]["article"],
             level="N3",
             focus=["全部"],
-            max_points=10,
         )
         self.assertGreaterEqual(len(result.points), 10)
+        frequencies = [point.exam_frequency for point in result.points]
+        self.assertEqual(frequencies, sorted(frequencies, reverse=True))
 
 
 if __name__ == "__main__":

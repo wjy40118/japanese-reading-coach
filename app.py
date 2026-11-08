@@ -240,22 +240,19 @@ def filter_result_by_level(result: AnalysisResult, level: str) -> AnalysisResult
     return result
 
 
-def ensure_minimum_points(
+def enrich_analysis_points(
     result: AnalysisResult,
     article: str,
     analyzer: RuleBasedAnalyzer,
     *,
     level: str,
     focus: list[str],
-    minimum: int = 10,
 ) -> AnalysisResult:
-    if len(result.points) >= minimum:
-        return result
     supplement = analyzer.analyze(
         article,
         level=level,
         focus=focus,
-        max_points=minimum,
+        max_points=None,
     )
     existing = {(point.kind, point.term) for point in result.points}
     added = 0
@@ -266,18 +263,18 @@ def ensure_minimum_points(
         result.points.append(point)
         existing.add(key)
         added += 1
-        if len(result.points) >= minimum:
-            break
     if added:
         result.warnings.append(
-            f"为补足单篇分析粒度，额外加入了 {added} 个语境词汇候选；"
+            f"额外合并了 {added} 个规则或语境词汇候选；"
             "这些候选需要结合上下文核验。"
         )
-    if len(result.points) < minimum:
-        result.warnings.append(
-            f"当前文章只生成 {len(result.points)} 个可用知识点。"
-            f"文章较短时可能无法稳定达到 {minimum} 个，建议增加原文长度。"
+    result.points.sort(
+        key=lambda point: (
+            -getattr(point, "exam_frequency", 3),
+            -getattr(point, "confidence", 0.0),
+            getattr(point, "term", ""),
         )
+    )
     return result
 
 
@@ -885,7 +882,7 @@ def main() -> None:
             if result is None:
                 raise RuntimeError("没有生成分析结果")
             result = filter_result_by_level(result, level)
-            result = ensure_minimum_points(
+            result = enrich_analysis_points(
                 result,
                 article,
                 analyzer,

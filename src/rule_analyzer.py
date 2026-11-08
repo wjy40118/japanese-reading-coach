@@ -64,7 +64,7 @@ class RuleBasedAnalyzer:
         *,
         level: str = "N3",
         focus: list[str] | None = None,
-        max_points: int = 10,
+        max_points: int | None = None,
         include_context_vocabulary: bool = True,
     ) -> AnalysisResult:
         focus = focus or ["全部"]
@@ -82,7 +82,7 @@ class RuleBasedAnalyzer:
             reverse=True,
         )
         for pattern in ordered_patterns:
-            if len(points) >= max_points:
+            if max_points is not None and len(points) >= max_points:
                 break
             term = str(pattern.get("term", "")).strip()
             kind = str(pattern.get("kind", "grammar"))
@@ -121,7 +121,7 @@ class RuleBasedAnalyzer:
             reverse=True,
         )
         for entry in ordered_lexicon:
-            if len(points) >= max_points:
+            if max_points is not None and len(points) >= max_points:
                 break
             term = str(entry.get("term", "")).strip()
             point_level = str(entry.get("estimated_level", "未估计"))
@@ -150,17 +150,29 @@ class RuleBasedAnalyzer:
 
         if (
             include_context_vocabulary
-            and len(points) < max_points
             and self._matches_focus("vocabulary", focus)
         ):
+            limit = (
+                10_000
+                if max_points is None
+                else max_points - len(points)
+            )
             points.extend(
                 extract_context_vocabulary(
                     text,
                     level=level,
                     excluded_terms=matched_terms,
-                    limit=max_points - len(points),
+                    limit=max(0, limit),
                 )
             )
+
+        points.sort(
+            key=lambda point: (
+                -point.exam_frequency,
+                -point.confidence,
+                point.term,
+            )
+        )
 
         sentences = split_sentences(text)
         terms = "、".join(point.term for point in points[:4])
