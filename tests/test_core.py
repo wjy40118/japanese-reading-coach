@@ -141,6 +141,18 @@ class AnalyzerTests(unittest.TestCase):
         frequencies = [point.exam_frequency for point in result.points]
         self.assertEqual(frequencies, sorted(frequencies, reverse=True))
 
+    def test_rule_mode_generates_practice(self) -> None:
+        result = self.analyzer.analyze(
+            self.samples[0]["article"],
+            level="N3",
+            focus=["全部"],
+        )
+        self.assertGreaterEqual(len(result.practice), 10)
+        for question in result.practice:
+            self.assertGreaterEqual(len(question.options), 3)
+            self.assertGreaterEqual(question.answer_index, 0)
+            self.assertLess(question.answer_index, len(question.options))
+
 
 if __name__ == "__main__":
     unittest.main()

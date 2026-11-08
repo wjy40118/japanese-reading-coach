@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import re
 from pathlib import Path
 from typing import Any
 
@@ -64,6 +65,90 @@ class RuleBasedAnalyzer:
             payload.get("exam_frequency", payload.get("frequency", 3))
         )
 
+    @staticmethod
+    def _fallback_practice(
+        points: list[KnowledgePoint],
+        existing_terms: set[str],
+    ) -> list[PracticeQuestion]:
+        questions: list[PracticeQuestion] = []
+        grammar_explanations = [
+            point.explanation
+            for point in points
+            if point.kind in {"grammar", "structure", "cohesion"}
+            and point.explanation
+        ]
+        vocabulary_explanations = [
+            point.explanation
+            for point in points
+            if point.kind == "vocabulary" and point.explanation
+        ]
+        pos_options = ["名词", "动词", "形容词", "副词"]
+
+        for point in points:
+            if point.term in existing_terms:
+                continue
+
+            pos_match = re.search(
+                r"语境词汇（(名词|动词|形容词|副词)）",
+                point.explanation,
+            )
+            if pos_match:
+                correct_pos = pos_match.group(1)
+                questions.append(
+                    PracticeQuestion(
+                        question=f"「{point.term}」在文中属于哪类词？",
+                        options=list(pos_options),
+                        answer_index=pos_options.index(correct_pos),
+                        explanation=point.explanation,
+                    )
+                )
+                continue
+
+            if point.kind == "vocabulary":
+                correct = point.explanation
+                distractors = [
+                    text
+                    for text in vocabulary_explanations
+                    if text and text != correct
+                ][:2]
+                if len(distractors) < 2:
+                    continue
+                options = [correct, *distractors]
+                shift = len(questions) % len(options)
+                options = options[shift:] + options[:shift]
+                questions.append(
+                    PracticeQuestion(
+                        question=f"「{point.term}」在文中最接近哪个意思？",
+                        options=options,
+                        answer_index=options.index(correct),
+                        explanation=f"{point.term}：{correct}",
+                    )
+                )
+                continue
+
+            correct = point.explanation
+            distractors = [
+                text
+                for text in grammar_explanations
+                if text and text != correct
+            ][:2]
+            if len(distractors) < 2:
+                continue
+            options = [correct, *distractors]
+            shift = len(questions) % len(options)
+            options = options[shift:] + options[:shift]
+            questions.append(
+                PracticeQuestion(
+                    question=(
+                        f"文中「{point.term}」的作用或含义最接近哪一项？"
+                    ),
+                    options=options,
+                    answer_index=options.index(correct),
+                    explanation=f"{point.term}：{correct}",
+                )
+            )
+        return questions
+
     def analyze(
         self,
         text: str,
@@ -81,6 +166,7 @@ class RuleBasedAnalyzer:
         points: list[KnowledgePoint] = []
         practice: list[PracticeQuestion] = []
         matched_terms: set[str] = set()
+        quiz_terms: set[str] = set()
 
         ordered_patterns = sorted(
             self.patterns,
@@ -120,6 +206,7 @@ class RuleBasedAnalyzer:
             quiz = pattern.get("quiz")
             if isinstance(quiz, dict):
                 practice.append(PracticeQuestion.from_dict(quiz))
+                quiz_terms.add(term)
 
         ordered_lexicon = sorted(
             self.lexicon,
@@ -180,6 +267,13 @@ class RuleBasedAnalyzer:
             )
         )
 
+        practice.extend(
+            self._fallback_practice(
+                points,
+                quiz_terms,
+            )
+        )
+
         sentences = split_sentences(text)
         terms = "、".join(point.term for point in points[:4])
         summary = (
@@ -207,7 +301,7 @@ class RuleBasedAnalyzer:
                 [point.estimated_level for point in points]
             ),
             points=points,
-            practice=practice[:3],
+            practice=practice,
             warnings=warnings,
             mode="rule",
         )
