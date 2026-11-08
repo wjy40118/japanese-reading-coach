@@ -24,6 +24,7 @@ from src.schema import AnalysisResult
 from src.text_utils import (
     japanese_character_count,
     level_matches,
+    split_sentences,
     validate_article,
 )
 
@@ -84,6 +85,22 @@ st.markdown(
         border-radius: 0.8rem;
         padding: 1rem 1.15rem;
         margin: 0.5rem 0 1rem;
+      }
+      .sentence-block {
+        padding: 0.9rem 0 1rem;
+        border-bottom: 1px solid #e3dac8;
+      }
+      .sentence-block:last-child {
+        border-bottom: none;
+      }
+      .knowledge-note {
+        color: #c44732;
+        font-size: 0.9rem;
+        line-height: 2.1;
+        margin-top: 0.5rem;
+      }
+      .knowledge-note strong {
+        color: #a93623;
       }
       ruby {
         ruby-position: over;
@@ -228,6 +245,25 @@ def ensure_minimum_points(
     return result
 
 
+def points_for_sentence(sentence: str, points) -> list:
+    matched = []
+    seen = set()
+    for point in points:
+        quote = str(getattr(point, "quote", "")).strip()
+        term = str(getattr(point, "term", "")).strip()
+        if not (
+            (quote and (quote in sentence or sentence in quote))
+            or (term and term in sentence)
+        ):
+            continue
+        key = (getattr(point, "kind", ""), term)
+        if key in seen:
+            continue
+        matched.append(point)
+        seen.add(key)
+    return matched
+
+
 def render_analysis(result: AnalysisResult, article: str) -> None:
     st.divider()
     st.subheader("分析结果")
@@ -255,11 +291,29 @@ def render_analysis(result: AnalysisResult, article: str) -> None:
 
     with tabs[1]:
         st.markdown("### 原文与汉字注音")
-        st.markdown(
-            f'<div class="furigana-text furigana-panel">'
-            f"{annotate_japanese(article)}</div>",
-            unsafe_allow_html=True,
-        )
+        for sentence in split_sentences(article):
+            matched_points = points_for_sentence(sentence, result.points)
+            notes = []
+            for point in matched_points:
+                notes.append(
+                    f"{KIND_LABELS.get(point.kind, point.kind)}・"
+                    f"{annotate_japanese(point.term)} "
+                    f"{frequency_stars(getattr(point, 'exam_frequency', 3))}"
+                )
+            note_html = (
+                '<div class="knowledge-note"><strong>知识点：</strong>'
+                + "　".join(notes)
+                + "</div>"
+                if notes
+                else ""
+            )
+            st.markdown(
+                '<div class="sentence-block">'
+                f'<div class="furigana-text">{annotate_japanese(sentence)}</div>'
+                f"{note_html}"
+                "</div>",
+                unsafe_allow_html=True,
+            )
 
     with tabs[2]:
         if not result.points:
