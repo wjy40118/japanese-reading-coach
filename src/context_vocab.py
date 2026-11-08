@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from .furigana import furigana_available, katakana_to_hiragana
+from .jmdict_cn import lookup_chinese_meaning
 from .schema import KnowledgePoint
 from .text_utils import sentence_containing
 
@@ -68,10 +69,21 @@ def extract_context_vocabulary(
             continue
         reading = katakana_to_hiragana(token.reading_form() or "")
         pos_label = CONTENT_POS_LABELS[pos[0]]
-        explanation = (
-            f"语境词汇（{pos_label}）。辞书形：{dictionary_form}。"
-            "先结合原句、前后搭配和词性判断它在当前语境中的具体含义。"
+        definition = (
+            lookup_chinese_meaning(dictionary_form)
+            or lookup_chinese_meaning(surface)
         )
+        if definition:
+            meaning, _entry_id = definition
+            explanation = (
+                f"{meaning}。语境词汇（{pos_label}）；"
+                f"辞书形：{dictionary_form}。"
+            )
+        else:
+            explanation = (
+                f"中文释义待补充。语境词汇（{pos_label}）；"
+                f"辞书形：{dictionary_form}，请结合原句核验。"
+            )
         points.append(
             KnowledgePoint(
                 kind="vocabulary",

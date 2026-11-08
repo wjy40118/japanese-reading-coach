@@ -148,8 +148,8 @@ KIND_LABELS = {
     "cohesion": "篇章连接",
     "other": "其他",
 }
-DATA_VERSION = "2026-11-09-private-pdf-v11"
-APP_SESSION_VERSION = "2026-11-09-private-pdf-v1"
+DATA_VERSION = "2026-11-09-jmdict-cn-v12"
+APP_SESSION_VERSION = "2026-11-09-jmdict-cn-v1"
 
 
 def frequency_stars(value: int) -> str:

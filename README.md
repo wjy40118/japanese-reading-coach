@@ -99,6 +99,8 @@ $env:PRIVATE_APP_PASSWORD="设置一个足够长的访问密码"
 
 扫描页 OCR 依赖 `packages.txt` 中的 Tesseract 日语语言包。部署到 Streamlit Cloud 时，平台会根据 `packages.txt` 安装系统依赖。
 
+语境词汇的中文释义来自开源项目 `jmdict-cn`，数据许可证为 CC BY-SA 4.0。许可证和上游署名保存在 `data/jmdict_cn/LICENSE` 与 `data/jmdict_cn/ATTRIBUTION.md`。
+
 设计文档中的“数据来源与许可”应写清楚：示例文章为合成的学习材料，词典和模型的实际许可需按其官方模型卡和数据来源逐项标注。不要直接保存用户文章，除非用户明确同意。
 
 ## 目录结构

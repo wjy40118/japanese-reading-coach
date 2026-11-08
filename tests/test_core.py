@@ -155,6 +155,27 @@ class AnalyzerTests(unittest.TestCase):
             self.assertNotIn("哪类词", question.question)
             self.assertNotIn("词性", question.question)
 
+    def test_context_vocabulary_has_chinese_explanation(self) -> None:
+        result = self.analyzer.analyze(
+            self.samples[0]["article"],
+            level="N3",
+            focus=["全部"],
+        )
+        context_points = [
+            point
+            for point in result.points
+            if point.explanation.startswith(("中文释义", "语境词汇"))
+            or "。语境词汇" in point.explanation
+        ]
+        self.assertTrue(context_points)
+        self.assertTrue(
+            all(
+                "中文释义待补充" in point.explanation
+                or "。语境词汇" in point.explanation
+                for point in context_points
+            )
+        )
+
     def test_vocabulary_practice_uses_meanings(self) -> None:
         result = self.analyzer.analyze(
             "新しい言葉の意味を理解し、文章の内容を表現する。" * 3,
