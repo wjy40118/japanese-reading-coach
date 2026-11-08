@@ -21,6 +21,11 @@ from src.official_samples import (
     load_official_catalog,
     search_official_samples,
 )
+from src.private_pdf import (
+    extract_private_pdf_page,
+    get_pdf_page_count,
+    ocr_available,
+)
 from src.rule_analyzer import RuleBasedAnalyzer
 from src.samples import load_samples, sample_to_result
 from src.schema import AnalysisResult, coerce_exam_frequency
@@ -143,8 +148,8 @@ KIND_LABELS = {
     "cohesion": "篇章连接",
     "other": "其他",
 }
-DATA_VERSION = "2026-11-09-vocabulary-meaning-v10"
-APP_SESSION_VERSION = "2026-11-09-vocabulary-meaning-v1"
+DATA_VERSION = "2026-11-09-private-pdf-v11"
+APP_SESSION_VERSION = "2026-11-09-private-pdf-v1"
 
 
 def frequency_stars(value: int) -> str:
@@ -184,6 +189,9 @@ def enforce_private_access() -> bool:
 
 def logout_private() -> None:
     st.session_state.pop("private_authenticated", None)
+    st.session_state.pop("private_pdf_text", None)
+    st.session_state.pop("private_pdf_method", None)
+    st.session_state.pop("private_pdf_signature", None)
 
 
 @st.cache_data
@@ -220,6 +228,9 @@ def reset_analysis() -> None:
     st.session_state.pop("last_article", None)
     st.session_state.pop("last_analysis_level", None)
     st.session_state.pop("official_sample_id", None)
+    st.session_state.pop("private_pdf_text", None)
+    st.session_state.pop("private_pdf_method", None)
+    st.session_state.pop("private_pdf_signature", None)
     st.session_state["show_answers"] = False
 
 
@@ -654,6 +665,14 @@ def go_to_single_analysis() -> None:
     st.session_state["article_input"] = ""
 
 
+def send_private_pdf_text_to_analysis() -> None:
+    st.session_state["analysis_mode"] = "规则解析"
+    st.session_state["article_input"] = st.session_state.get(
+        "private_pdf_text",
+        "",
+    )
+
+
 def render_official_sample(resource: OfficialSampleResource) -> None:
     st.divider()
     st.subheader(f"{resource.level}｜{resource.collection_label}")
@@ -723,6 +742,86 @@ def render_official_sample(resource: OfficialSampleResource) -> None:
     )
 
 
+def render_private_pdf_mode() -> None:
+    st.subheader("私密真题 PDF")
+    st.info(
+        "PDF 只在当前浏览器会话中临时处理，不写入磁盘，也不会提交到 GitHub。"
+        "请只上传你有权使用的文件。"
+    )
+    uploaded = st.file_uploader(
+        "上传自己的真题 PDF",
+        type=["pdf"],
+        accept_multiple_files=False,
+    )
+    if uploaded is None:
+        st.caption("上传后选择页码，应用会先提取文字；扫描页可尝试 OCR。")
+        return
+
+    pdf_bytes = uploaded.getvalue()
+    signature = f"{uploaded.name}:{uploaded.size}"
+    if st.session_state.get("private_pdf_signature") != signature:
+        st.session_state["private_pdf_signature"] = signature
+        st.session_state.pop("private_pdf_text", None)
+        st.session_state.pop("private_pdf_method", None)
+
+    try:
+        page_count = get_pdf_page_count(pdf_bytes)
+    except Exception as exc:
+        st.error(f"无法读取 PDF：{exc}")
+        return
+
+    st.caption(f"{uploaded.name}｜共 {page_count} 页")
+    page_number = st.number_input(
+        "页码",
+        min_value=1,
+        max_value=page_count,
+        value=1,
+        step=1,
+    )
+    tesseract_ready = ocr_available()
+    if not tesseract_ready:
+        st.warning(
+            "当前环境没有可用的日语 OCR。文字版 PDF 仍可提取；扫描页需安装 "
+            "tesseract-ocr 和 tesseract-ocr-jpn。"
+        )
+    use_ocr = st.checkbox(
+        "扫描页使用 OCR",
+        value=tesseract_ready,
+        disabled=not tesseract_ready,
+    )
+    if st.button("提取当前页", type="primary"):
+        with st.spinner("正在读取当前页……"):
+            extracted = extract_private_pdf_page(
+                pdf_bytes,
+                int(page_number),
+                use_ocr=use_ocr,
+            )
+        st.session_state["private_pdf_text"] = extracted.text
+        st.session_state["private_pdf_method"] = extracted.method
+        for warning in extracted.warnings:
+            st.warning(warning)
+
+    text = st.session_state.get("private_pdf_text", "")
+    method = st.session_state.get("private_pdf_method", "")
+    if text:
+        st.caption(f"提取方式：{method}｜字符数：{len(text)}")
+        st.text_area("当前页提取文本", text, height=320, disabled=True)
+        st.button(
+            "发送到单篇分析",
+            type="secondary",
+            on_click=send_private_pdf_text_to_analysis,
+        )
+        st.download_button(
+            "导出当前页文本",
+            data=text,
+            file_name=(
+                f"{uploaded.name.rsplit('.', 1)[0]}-"
+                f"page-{int(page_number)}.txt"
+            ),
+            mime="text/plain",
+        )
+
+
 def main() -> None:
     private_enabled = enforce_private_access()
     if st.session_state.get("app_session_version") != APP_SESSION_VERSION:
@@ -751,14 +850,17 @@ def main() -> None:
                 on_click=logout_private,
                 width="stretch",
             )
+        mode_options = [
+            "演示案例",
+            "规则解析",
+            "本地模型（可选）",
+            "官方公开样题",
+        ]
+        if private_enabled:
+            mode_options.insert(3, "私密真题 PDF")
         mode_label = st.radio(
             "分析方式",
-            [
-                "演示案例",
-                "规则解析",
-                "本地模型（可选）",
-                "官方公开样题",
-            ],
+            mode_options,
             index=0,
             on_change=reset_analysis,
             key="analysis_mode",
@@ -798,8 +900,12 @@ def main() -> None:
     needs_refresh_notice = False
     active_level = level
     matched_official_resource: OfficialSampleResource | None = None
+    standalone_mode_rendered = False
 
-    if mode_label == "官方公开样题":
+    if mode_label == "私密真题 PDF":
+        render_private_pdf_mode()
+        standalone_mode_rendered = True
+    elif mode_label == "官方公开样题":
         official_levels = ["N1", "N2", "N3", "N4", "N5"]
         official_level = st.selectbox(
             "考试等级",
@@ -993,7 +1099,7 @@ def main() -> None:
         render_official_sample(official_result)
     elif result:
         render_analysis(result, last_article, n2_matcher)
-    else:
+    elif not standalone_mode_rendered:
         st.info("选择分析模式后，点击对应按钮开始。")
 
     with st.expander("这个原型如何处理 AI 风险？"):

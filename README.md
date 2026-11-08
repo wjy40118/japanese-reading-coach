@@ -89,6 +89,16 @@ $env:PRIVATE_APP_PASSWORD="设置一个足够长的访问密码"
 
 更稳妥的方式是使用 Tailscale、ZeroTier 或 Cloudflare Access，只允许授权设备或账号进入。Streamlit Community Cloud 的公开网址即使增加密码门，也只属于原型级保护；不要将受限制的完整真题提交到公开 GitHub。
 
+登录私密访问后，侧边栏会出现“私密真题 PDF”模式：
+
+- 上传自己的 PDF；
+- 选择页码；
+- 优先提取 PDF 文字，扫描页可启用日语 OCR；
+- 将提取结果发送到单篇分析；
+- PDF 和提取文本不会写入磁盘或提交到 GitHub。
+
+扫描页 OCR 依赖 `packages.txt` 中的 Tesseract 日语语言包。部署到 Streamlit Cloud 时，平台会根据 `packages.txt` 安装系统依赖。
+
 设计文档中的“数据来源与许可”应写清楚：示例文章为合成的学习材料，词典和模型的实际许可需按其官方模型卡和数据来源逐项标注。不要直接保存用户文章，除非用户明确同意。
 
 ## 目录结构
