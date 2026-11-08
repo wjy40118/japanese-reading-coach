@@ -499,6 +499,11 @@ def render_bank_analysis(result: BankAnalysis) -> None:
         st.code(payload, language="json")
 
 
+def go_to_single_analysis() -> None:
+    st.session_state["analysis_mode"] = "规则解析"
+    st.session_state["article_input"] = ""
+
+
 def render_official_sample(resource: OfficialSampleResource) -> None:
     st.divider()
     st.subheader(f"{resource.level}｜{resource.collection_label}")
@@ -538,10 +543,11 @@ def render_official_sample(resource: OfficialSampleResource) -> None:
         "打开官方 PDF 或互动样题，复制其中允许用于学习的阅读正文，"
         "再到“规则解析”中粘贴分析。应用不会自动抓取或保存官方题面。"
     )
-    if st.button("转到单篇分析", type="secondary"):
-        st.session_state["analysis_mode"] = "规则解析"
-        st.session_state["article_input"] = ""
-        st.rerun()
+    st.button(
+        "转到单篇分析",
+        type="secondary",
+        on_click=go_to_single_analysis,
+    )
 
     with st.expander("来源与版权说明"):
         st.markdown(f"[JLPT 官方样题页面]({resource.source_url})")
